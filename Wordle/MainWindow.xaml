@@ -17,7 +17,7 @@
 
 
         <!-- Knop om het woord te controleren -->
-        <Button Content="Controleer" HorizontalAlignment="Center" VerticalAlignment="Top" Width="100" Margin="0,120,0,0" Click="CheckWordButton_Click"/>
+        <Button Content="Controleer Woord" HorizontalAlignment="Center" VerticalAlignment="Top" Width="100" Margin="0,120,0,0" Click="CheckWordButton_Click"/>
 
         <!-- Resultaten grid -->
         <UniformGrid x:Name="ResultGrid" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,180,0,0" Rows="1" Columns="5" />
