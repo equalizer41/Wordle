@@ -1,86 +1,263 @@
 ﻿<Window x:Class="WordleGame.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Wordle" Height="450" Width="500">
-	<Grid>
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<!-- Voor de tekstinstructie bovenaan -->
-			<RowDefinition Height="Auto"/>
-			<!-- Voor de letterboxen -->
-			<RowDefinition Height="Auto"/>
-			<!-- Voor de "Druk op enter"-tekst -->
-			<RowDefinition Height="Auto"/>
-			<!-- Voor de Nieuw Spel-knop -->
-			<RowDefinition Height="*"/>
-			<!-- Voor eventuele extra ruimte -->
-		</Grid.RowDefinitions>
+        Title="Wordle" Height="450" Width="600" Background="#F5F5F5">
 
-		<!-- Instructies voor de speler -->
-		<TextBlock Text="Voer een vijfletterwoord in:" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Grid.Row="0"/>
+	<Window.Resources>
+		<!-- Color resources -->
+		<Color x:Key="CorrectGreen">#6AAA64</Color>
+		<Color x:Key="PresentYellow">#C9B458</Color>
+		<Color x:Key="AbsentGray">#787C7E</Color>
+		<Color x:Key="DefaultGray">#D3D6DA</Color>
 
-		<!-- Grid voor de 6 pogingen met 5 tekstvakken per poging -->
-		<StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Orientation="Vertical" Margin="0,50,0,0">
-			<!-- Eerste poging -->
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<TextBox x:Name="LetterBox1_1" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox1_2" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox1_3" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox1_4" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox1_5" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+		<!-- Tile background resource -->
+		<SolidColorBrush x:Key="DefaultTileBackground" Color="{StaticResource DefaultGray}" />
+
+		<!-- Animation for Tile Flip when color changes -->
+		<Storyboard x:Key="TileFlipAnimation">
+			<DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)"
+							 From="1" To="0" Duration="0:0:0.2" AutoReverse="True"/>
+		</Storyboard>
+
+		<!-- TextBox style for tiles -->
+		<Style x:Key="TileStyle" TargetType="TextBox">
+			<Setter Property="BorderBrush" Value="Transparent"/>
+			<Setter Property="Padding" Value="5"/>
+			<Setter Property="FontSize" Value="24"/>
+			<Setter Property="Background" Value="{StaticResource DefaultTileBackground}"/>
+			<Setter Property="TextAlignment" Value="Center"/>
+			<Setter Property="Effect">
+				<Setter.Value>
+					<DropShadowEffect BlurRadius="5" ShadowDepth="2" Color="Gray" />
+				</Setter.Value>
+			</Setter>
+			<Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+			<Setter Property="RenderTransform">
+				<Setter.Value>
+					<ScaleTransform ScaleX="1" ScaleY="1" />
+				</Setter.Value>
+			</Setter>
+			<!-- Add triggers to animate the flip when color changes -->
+			<Style.Triggers>
+				<EventTrigger RoutedEvent="TextBox.TextChanged">
+					<BeginStoryboard Storyboard="{StaticResource TileFlipAnimation}"/>
+				</EventTrigger>
+			</Style.Triggers>
+		</Style>
+
+		<!-- Button style -->
+		<Style x:Key="ButtonStyle" TargetType="Button">
+			<Setter Property="Background" Value="#F5F5F5" />
+			<Setter Property="FontSize" Value="16" />
+			<Setter Property="Padding" Value="10,5" />
+			<Setter Property="Effect">
+				<Setter.Value>
+					<DropShadowEffect BlurRadius="5" ShadowDepth="3" Color="Gray" />
+				</Setter.Value>
+			</Setter>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="Button">
+						<Border CornerRadius="10" BorderBrush="#cccccc" BorderThickness="2" Background="{TemplateBinding Background}">
+							<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+						</Border>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+			<!-- Mouse-over effect -->
+			<Style.Triggers>
+				<Trigger Property="IsMouseOver" Value="True">
+					<Setter Property="Background" Value="#E0E0E0"/>
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+	</Window.Resources>
+		<Grid>
+			<!-- Instructies voor de speler -->
+			<TextBlock Text="Voer een vijfletterwoord in:" HorizontalAlignment="Center" VerticalAlignment="Top"
+					   Margin="0,0,0,0" Grid.Row="0" FontFamily="Roboto" FontSize="16" Foreground="#333"/>
+
+			<!-- Grid voor de letterboxen -->
+			<StackPanel HorizontalAlignment="Center" VerticalAlignment="Top" Orientation="Vertical" Margin="0,20,0,10" Grid.Row="1">
+
+				<!-- Eerste poging -->
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+				<TextBox x:Name="LetterBox1_1" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox1_2" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox1_3" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox1_4" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox1_5" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
 			</StackPanel>
 
 			<!-- Tweede poging -->
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<TextBox x:Name="LetterBox2_1" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox2_2" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox2_3" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox2_4" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox2_5" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+				<TextBox x:Name="LetterBox2_1" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox2_2" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox2_3" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox2_4" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox2_5" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
 			</StackPanel>
 
 			<!-- Derde poging -->
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<TextBox x:Name="LetterBox3_1" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox3_2" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox3_3" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox3_4" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox3_5" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+				<TextBox x:Name="LetterBox3_1" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox3_2" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox3_3" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox3_4" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox3_5" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
 			</StackPanel>
 
 			<!-- Vierde poging -->
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<TextBox x:Name="LetterBox4_1" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox4_2" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox4_3" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox4_4" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox4_5" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+				<TextBox x:Name="LetterBox4_1" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox4_2" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox4_3" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox4_4" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox4_5" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
 			</StackPanel>
 
 			<!-- Vijfde poging -->
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<TextBox x:Name="LetterBox5_1" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox5_2" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox5_3" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox5_4" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox5_5" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+				<TextBox x:Name="LetterBox5_1" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox5_2" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox5_3" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox5_4" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox5_5" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
 			</StackPanel>
 
 			<!-- Zesde poging -->
-			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-				<TextBox x:Name="LetterBox6_1" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox6_2" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox6_3" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox6_4" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
-				<TextBox x:Name="LetterBox6_5" Width="30" MaxLength="1" TextAlignment="Center" FontSize="20" PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged" PreviewKeyDown="TextBox_PreviewKeyDown"/>
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="5">
+				<TextBox x:Name="LetterBox6_1" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox6_2" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox6_3" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox6_4" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
+				<TextBox x:Name="LetterBox6_5" Width="40" MaxLength="1" TextAlignment="Center" FontSize="24"
+						 PreviewTextInput="TextBox_PreviewTextInput" TextChanged="TextBox_TextChanged"
+						 PreviewKeyDown="TextBox_PreviewKeyDown" BorderBrush="#E0E0E0"
+						 Background="{StaticResource DefaultTileBackground}" Padding="5"
+						 Style="{StaticResource TileStyle}" />
 			</StackPanel>
 		</StackPanel>
-
-		<!-- Verplaatst naar onder de letterboxen -->
-		<TextBlock Text="Druk op enter om te raden!" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" Grid.Row="2"/>
-
-		<!-- Verplaatst en uitgelijnd onder de 'Druk op enter' tekst -->
-		<Button Content="Nieuw Spel" HorizontalAlignment="Center" VerticalAlignment="Top" Width="100" Margin="0,10,0,0" Grid.Row="3" Click="NewGameButton_Click"/>
+			<!-- Nieuw Spel Button -->
+			<Button Content="Nieuw Spel" HorizontalAlignment="Center" VerticalAlignment="Bottom" Width="120"
+					Margin="0,10,0,10" Grid.Row="3" Click="NewGameButton_Click" FontSize="16" Padding="10,5"
+					Style="{StaticResource ButtonStyle}">
+			</Button>
 	</Grid>
 </Window>
-

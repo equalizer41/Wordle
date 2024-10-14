@@ -239,42 +239,48 @@ namespace WordleGame
             }
         }
 
-        // Methode om de kleuren van de tekstvakken in te stellen
+        // Method to set the background colors of the text boxes
+        private void SetTextBoxColor(TextBox textBox, Brush color)
+        {
+            textBox.Background = color;
+        }
+
+        // Logic to color the letters correctly based on the guess
         private void ColorLetters(string guess, int attempt)
         {
             char[] secretWordArray = secretWord.ToCharArray();
             char[] guessArray = guess.ToCharArray();
-            bool[] correctLetters = new bool[5]; // Houdt bij welke letters al correct zijn geraden
+            bool[] correctLetters = new bool[5]; // Keeps track of letters that are already guessed correctly
 
-            // (groen) Eerste loop controleert alle correcte letters op de juiste positie
+            // First pass: check for correct letters in the correct position (Green)
             for (int i = 0; i < 5; i++)
             {
                 if (guessArray[i] == secretWordArray[i])
                 {
-                    SetTextBoxColor(GetTextBoxForAttempt(attempt, i), Brushes.Green); // Letter is groen
-                    correctLetters[i] = true; // Deze positie is al correct!
-                    secretWordArray[i] = '_'; // Markeer deze letter als "gebruikt"
+                    SetTextBoxColor(GetTextBoxForAttempt(attempt, i), new SolidColorBrush((Color)FindResource("CorrectGreen"))); // Green
+                    correctLetters[i] = true; // Mark the position as correct
+                    secretWordArray[i] = '_'; // Mark the letter as used
                 }
             }
 
-            // (geel) Daarna controleren we de overige letters die wel in het woord voorkomen maar op de verkeerde plek staan 
+            // Second pass: check for letters that are in the word but in the wrong position (Yellow)
             for (int i = 0; i < 5; i++)
             {
-                if (!correctLetters[i]) // Alleen checken als de letter nog niet correct was
+                if (!correctLetters[i]) // Only check if the letter is not already marked as correct
                 {
                     if (secretWordArray.Contains(guessArray[i]))
                     {
-                        SetTextBoxColor(GetTextBoxForAttempt(attempt, i), Brushes.Yellow); // Letter is geel
-                                                                                          
-                        secretWordArray[Array.IndexOf(secretWordArray, guessArray[i])] = '_'; // Markeer de gevonden letter als gebruikt, zodat deze niet nogmaals geel kan worden
+                        SetTextBoxColor(GetTextBoxForAttempt(attempt, i), new SolidColorBrush((Color)FindResource("PresentYellow"))); // Yellow
+                        secretWordArray[Array.IndexOf(secretWordArray, guessArray[i])] = '_'; // Mark the letter as used
                     }
                     else
                     {
-                        SetTextBoxColor(GetTextBoxForAttempt(attempt, i), Brushes.Gray); // Letter is grijs
+                        SetTextBoxColor(GetTextBoxForAttempt(attempt, i), new SolidColorBrush((Color)FindResource("AbsentGray"))); // Gray
                     }
                 }
             }
         }
+
 
         // Hulpmethode om de juiste TextBox te verkrijgen op basis van de poging en de positie
         private TextBox GetTextBoxForAttempt(int attempt, int index)
@@ -298,12 +304,7 @@ namespace WordleGame
             }
         }
 
-        // Methode om de achtergrondkleur van een TextBox in te stellen
-        private void SetTextBoxColor(TextBox textBox, Brush color)
-        {
-            textBox.Background = color;
-        }
-
+  
         // Focus op de volgende rij afhankelijk van de poging
         private void FocusNextAttempt()
         {
