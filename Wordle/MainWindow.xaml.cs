@@ -11,8 +11,17 @@ namespace WordleGame
         private string secretWord; // initaliseren van het geheime woord
         private int currentAttempt = 1; // Houdt bij welke poging aan de beurt is
         private const int maxAttempts = 6; // Maximaal aantal pogingen
-        private List<string> wordList = new List<string> { "appel", "boter", "stoel", "klomp", "fruit", "graan", "molen" };
-       
+        private List<string> wordList = new List<string> {
+        "appel", "boter", "stoel", "klomp", "fruit", "graan", "molen", "akker", "balen", "beeld", "beker",
+        "broek", "bruin", "buien", "dalen", "drama", "dreun", "duren", "eerde", "fiets", "garen",
+        "gaven", "glans", "graag", "groep", "grond", "halen", "harde", "haven", "hoofd", "hoven",
+        "kabel", "kamer", "klein", "knoop", "koers", "kopen", "kleur", "kweek", "lader", "lopen",
+        "maten", "meter", "namen", "nemen", "noord", "onder", "plank", "plint", "ploeg", "regen",
+        "rijen", "roest", "samen", "schep", "schoo", "schud", "smaak", "slaap", "snoer", "speld",
+        "staal", "steek", "stoel", "teken", "trein", "vaart", "vader", "varen", "velen", "vloer",
+        "vogel", "vrede", "wegen", "winst", "woord", "zeven", "zomer", "zware", "zweer", "zwier"
+        };
+
         public MainWindow()
         {
             InitializeComponent();
@@ -26,26 +35,28 @@ namespace WordleGame
             ClearAllTextBoxes();
             FocusNextAttempt(); // Focus op de eerste rij
         }
-
+       
+        // Selecteert een nieuw geheimwoord
         private string SelectRandomSecretWord(List<string> wordList)
         {
             Random random = new Random();
-            int randomIndex = random.Next(wordList.Count); // Selecteer een willekeurige index uit de lijst
-            return wordList[randomIndex]; // Retourneer het woord op die index
+            int randomIndex = random.Next(wordList.Count);
+            return wordList[randomIndex];
         }
-        // Eventhandler voor de "Nieuw Spel" knop
+     
+        // Logica voor de "Nieuw Spel" knop
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
         {
-            // Voeg hier de logica toe om een nieuw spel te starten
             ResetGame();        
         }
-        // Controleer of de invoer een letter is
+        // Controleert of de invoer een letter is
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^a-zA-Z]+");
             e.Handled = regex.IsMatch(e.Text);
         }
-        // Verplaats de focus naar het volgende tekstvak
+
+        // Methode voor het verplaatsen van de focus naar het volgende tekstvak
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             TextBox currentBox = sender as TextBox;
@@ -56,8 +67,7 @@ namespace WordleGame
             }
         }
 
-
-        // Verplaats focus terug bij backspace
+        // Methode voor het terug verplaatsen van focus bij de backspace toets
         private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             TextBox currentBox = sender as TextBox;
@@ -209,7 +219,7 @@ namespace WordleGame
                 if (guess.ToLower() == secretWord)
                 {
                     MessageBox.Show("Dit was het woord! Gefeliciteerd!");
-                    return; // Stop het spel, de speler heeft gewonnen
+                    return; // Stopt het spel
                 }
 
                 // Ga naar de volgende poging als er nog meer over zijn
@@ -236,18 +246,18 @@ namespace WordleGame
             char[] guessArray = guess.ToCharArray();
             bool[] correctLetters = new bool[5]; // Houdt bij welke letters al correct zijn geraden
 
-            // Eerst controleren we alle correcte letters op de juiste positie (groen)
+            // (groen) Eerste loop controleert alle correcte letters op de juiste positie
             for (int i = 0; i < 5; i++)
             {
                 if (guessArray[i] == secretWordArray[i])
                 {
                     SetTextBoxColor(GetTextBoxForAttempt(attempt, i), Brushes.Green); // Letter is groen
-                    correctLetters[i] = true; // Markeer deze positie als correct
+                    correctLetters[i] = true; // Deze positie is al correct!
                     secretWordArray[i] = '_'; // Markeer deze letter als "gebruikt"
                 }
             }
 
-            // Daarna controleren we de overige letters die wel in het woord voorkomen, maar op de verkeerde plek staan (geel)
+            // (geel) Daarna controleren we de overige letters die wel in het woord voorkomen maar op de verkeerde plek staan 
             for (int i = 0; i < 5; i++)
             {
                 if (!correctLetters[i]) // Alleen checken als de letter nog niet correct was
@@ -255,8 +265,8 @@ namespace WordleGame
                     if (secretWordArray.Contains(guessArray[i]))
                     {
                         SetTextBoxColor(GetTextBoxForAttempt(attempt, i), Brushes.Yellow); // Letter is geel
-                                                                                           // Markeer de gevonden letter als gebruikt, zodat deze niet nogmaals geel kan worden
-                        secretWordArray[Array.IndexOf(secretWordArray, guessArray[i])] = '_';
+                                                                                          
+                        secretWordArray[Array.IndexOf(secretWordArray, guessArray[i])] = '_'; // Markeer de gevonden letter als gebruikt, zodat deze niet nogmaals geel kan worden
                     }
                     else
                     {
@@ -294,7 +304,6 @@ namespace WordleGame
             textBox.Background = color;
         }
 
-
         // Focus op de volgende rij afhankelijk van de poging
         private void FocusNextAttempt()
         {
@@ -324,12 +333,16 @@ namespace WordleGame
             }
         }
 
-  
-        // Methode om alle tekstvakken te wissen en de kleuren te resetten
+
+        // Reset de achtergrondkleur van een tekstvak wordt gebruikt in de ClearAllTextBoxes methode
+        private void ResetTextBoxBackground(TextBox textBox)
+        {
+            textBox.Background = Brushes.White; // Reset de kleur van tekstbox naar wit
+        }
         // Methode om alle tekstvakken te wissen en de kleuren te resetten
         private void ClearAllTextBoxes()
         {
-            // Rijen 1
+            // Rij 1
             LetterBox1_1.Clear();
             LetterBox1_2.Clear();
             LetterBox1_3.Clear();
@@ -341,8 +354,7 @@ namespace WordleGame
             ResetTextBoxBackground(LetterBox1_4);
             ResetTextBoxBackground(LetterBox1_5);
 
-            // Voeg hier alle andere rijen toe (2-6)
-            // Voorbeeld voor rij 2
+            // rij 2
             LetterBox2_1.Clear();
             LetterBox2_2.Clear();
             LetterBox2_3.Clear();
@@ -354,7 +366,7 @@ namespace WordleGame
             ResetTextBoxBackground(LetterBox2_4);
             ResetTextBoxBackground(LetterBox2_5);
 
-            // Voorbeeld voor rij 3
+            // rij 3
             LetterBox3_1.Clear();
             LetterBox3_2.Clear();
             LetterBox3_3.Clear();
@@ -365,7 +377,8 @@ namespace WordleGame
             ResetTextBoxBackground(LetterBox3_3);
             ResetTextBoxBackground(LetterBox3_4);
             ResetTextBoxBackground(LetterBox3_5);
-
+            
+            // Rij 4
             LetterBox4_1.Clear();
             LetterBox4_2.Clear();
             LetterBox4_3.Clear();
@@ -377,6 +390,7 @@ namespace WordleGame
             ResetTextBoxBackground(LetterBox4_4);
             ResetTextBoxBackground(LetterBox4_5);
 
+            //Rij 5
             LetterBox5_1.Clear();
             LetterBox5_2.Clear();
             LetterBox5_3.Clear();
@@ -388,6 +402,7 @@ namespace WordleGame
             ResetTextBoxBackground(LetterBox5_4);
             ResetTextBoxBackground(LetterBox5_5);
 
+            //Rij 6
             LetterBox6_1.Clear();
             LetterBox6_2.Clear();
             LetterBox6_3.Clear();
@@ -398,12 +413,6 @@ namespace WordleGame
             ResetTextBoxBackground(LetterBox6_3);
             ResetTextBoxBackground(LetterBox6_4);
             ResetTextBoxBackground(LetterBox6_5);
-        }
-
-        // Reset de achtergrondkleur van een tekstvak
-        private void ResetTextBoxBackground(TextBox textBox)
-        {
-            textBox.Background = Brushes.White; // Reset de kleur naar wit
-        }
+        }       
     }
 }
