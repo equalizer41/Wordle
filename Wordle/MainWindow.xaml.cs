@@ -239,43 +239,43 @@ namespace WordleGame
             }
         }
 
-        // Method to set the background colors of the text boxes
+        // Methode voor de ahtergrond van de tekstblokken een kleur geven
         private void SetTextBoxColor(TextBox textBox, Brush color)
         {
             textBox.Background = color;
         }
 
-        // Logic to color the letters correctly based on the guess
+       // logica om kleuren te geven op basis van het geheime woord
         private void ColorLetters(string guess, int attempt)
         {
             char[] secretWordArray = secretWord.ToCharArray();
             char[] guessArray = guess.ToCharArray();
-            bool[] correctLetters = new bool[5]; // Keeps track of letters that are already guessed correctly
+            bool[] correctLetters = new bool[5]; // Houd bij welke letters al correct zijn met WAAR/NIETWAAR
 
-            // First pass: check for correct letters in the correct position (Green)
+            // GROEN checkt de letters die in de juiste positie staan
             for (int i = 0; i < 5; i++)
             {
                 if (guessArray[i] == secretWordArray[i])
                 {
                     SetTextBoxColor(GetTextBoxForAttempt(attempt, i), new SolidColorBrush((Color)FindResource("CorrectGreen"))); // Green
-                    correctLetters[i] = true; // Mark the position as correct
-                    secretWordArray[i] = '_'; // Mark the letter as used
+                    correctLetters[i] = true; // Markeer als correct
+                    secretWordArray[i] = '_'; // Markeer als gebruikt
                 }
             }
 
-            // Second pass: check for letters that are in the word but in the wrong position (Yellow)
+            // GEEL checkt de letters die wel in het woord zitten maar niet op de juiste plek
             for (int i = 0; i < 5; i++)
             {
-                if (!correctLetters[i]) // Only check if the letter is not already marked as correct
+                if (!correctLetters[i]) // Check de letter alleen als die nog niet correct is
                 {
                     if (secretWordArray.Contains(guessArray[i]))
                     {
-                        SetTextBoxColor(GetTextBoxForAttempt(attempt, i), new SolidColorBrush((Color)FindResource("PresentYellow"))); // Yellow
-                        secretWordArray[Array.IndexOf(secretWordArray, guessArray[i])] = '_'; // Mark the letter as used
+                        SetTextBoxColor(GetTextBoxForAttempt(attempt, i), new SolidColorBrush((Color)FindResource("PresentYellow"))); // Geel
+                        secretWordArray[Array.IndexOf(secretWordArray, guessArray[i])] = '_'; // markeer de letter als gebruikt
                     }
                     else
                     {
-                        SetTextBoxColor(GetTextBoxForAttempt(attempt, i), new SolidColorBrush((Color)FindResource("AbsentGray"))); // Gray
+                        SetTextBoxColor(GetTextBoxForAttempt(attempt, i), new SolidColorBrush((Color)FindResource("AbsentGray"))); // Grijs
                     }
                 }
             }
