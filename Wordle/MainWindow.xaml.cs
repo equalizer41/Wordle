@@ -9,7 +9,7 @@ namespace WordleGame
     public partial class MainWindow : Window
     {
         private string secretWord; // initaliseren van het geheime woord
-        private int currentAttempt = 1; // Houdt bij welke poging aan de beurt is
+        private int currentAttempt = 1; // Houdt bij welke poging het is
         private const int maxAttempts = 6; // Maximaal aantal pogingen
         private List<string> wordList = new List<string> {
         "appel", "boter", "stoel", "klomp", "fruit", "graan", "molen", "akker", "balen", "beeld", "beker",
